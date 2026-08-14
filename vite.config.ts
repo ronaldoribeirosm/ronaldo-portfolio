@@ -4,6 +4,9 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Em produção no GitHub Pages o site fica em /ronaldo-portfolio/.
+  // Localmente (dev/preview) permanece na raiz.
+  base: process.env.GITHUB_ACTIONS ? '/ronaldo-portfolio/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
