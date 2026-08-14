@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                       */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Tema RETRO (padrão) — cabine arcade azul-noite com neon disciplinado */
+  --c-bg: 7 11 22;
+  --c-surface: 15 22 38;
+  --c-surface-2: 24 34 54;
+  --c-line: 38 50 77;
+  --c-ink: 234 238 249;
+  --c-dim: 166 178 208;
+
+  --c-primary: 53 232 213; /* ciano */
+  --c-secondary: 255 77 141; /* magenta */
+  --c-accent: 255 194 75; /* dourado */
+  --c-violet: 155 123 255;
+  --c-grass: 75 227 138;
+  --c-danger: 255 92 92;
+
+  --grid-alpha: 0.045;
+  --scan-alpha: 0.05;
+
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-cursor: 70;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+:root[data-theme='cyber'] {
+  /* Tema CYBER — roxo profundo, neon mais quente e scanlines mais presentes */
+  --c-bg: 10 5 20;
+  --c-surface: 20 12 36;
+  --c-surface-2: 32 18 54;
+  --c-line: 58 36 92;
+  --c-ink: 240 236 255;
+  --c-dim: 183 168 216;
+
+  --c-primary: 41 242 224;
+  --c-secondary: 255 46 154;
+  --c-accent: 245 211 59;
+  --c-violet: 176 130 255;
+  --c-grass: 80 240 150;
+
+  --grid-alpha: 0.06;
+  --scan-alpha: 0.08;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: rgb(var(--c-bg));
+  color: rgb(var(--c-ink));
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* fundo em grade sutil + gradiente de profundidade, fixo atrás de tudo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgb(var(--c-primary) / 0.08), transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, rgb(var(--c-secondary) / 0.06), transparent 55%),
+    linear-gradient(rgb(var(--c-line) / var(--grid-alpha)) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-line) / var(--grid-alpha)) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-color: rgb(var(--c-bg));
+}
+
+::selection {
+  background: rgb(var(--c-primary) / 0.3);
+  color: rgb(var(--c-ink));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* foco visível consistente */
+:focus-visible {
+  outline: 2px solid rgb(var(--c-primary));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* scrollbar temática */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(var(--c-surface));
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-line));
+  border: 3px solid rgb(var(--c-surface));
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--c-primary) / 0.6);
+}
+
+/* ------------------------------------------------------------------ */
+/* Utilitários de estilo arcade                                        */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  .font-pixel {
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* borda em degrau, sem antialias, imitando pixel */
+  .pixel-border {
+    border: 2px solid rgb(var(--c-line));
+    box-shadow: 0 0 0 2px rgb(var(--c-bg)), 0 0 0 4px rgb(var(--c-line) / 0.4);
+  }
+
+  .panel {
+    background: rgb(var(--c-surface) / 0.85);
+    border: 1px solid rgb(var(--c-line));
+    backdrop-filter: blur(6px);
+  }
+
+  .neon {
+    text-shadow: 0 0 8px currentColor, 0 0 20px rgb(var(--c-primary) / 0.35);
+  }
+
+  /* linhas de varredura decorativas (usar com moderação) */
+  .scanlines {
+    position: relative;
+  }
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / var(--scan-alpha)) 0,
+      rgb(0 0 0 / var(--scan-alpha)) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* botão base estilo cartucho */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.15rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    line-height: 1;
+    color: rgb(var(--c-ink));
+    background: rgb(var(--c-surface-2));
+    border: 2px solid rgb(var(--c-line));
+    cursor: pointer;
+    transition:
+      transform 140ms var(--ease-out),
+      border-color 140ms var(--ease-out),
+      box-shadow 140ms var(--ease-out),
+      background-color 140ms var(--ease-out);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    color: rgb(var(--c-bg));
+    background: rgb(var(--c-primary));
+    border-color: rgb(var(--c-primary));
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 0 2px rgb(var(--c-bg)), 0 0 24px -4px rgb(var(--c-primary));
+  }
+
+  .btn-ghost:hover {
+    border-color: rgb(var(--c-primary));
+    box-shadow: 0 0 20px -6px rgb(var(--c-primary) / 0.8);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: rgb(var(--c-dim));
+    background: rgb(var(--c-surface-2) / 0.7);
+    border: 1px solid rgb(var(--c-line));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Modo lendário (easter egg do código clássico)                       */
+/* ------------------------------------------------------------------ */
+
+html.legendary::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgb(var(--c-primary) / 0.14),
+    rgb(var(--c-secondary) / 0.14),
+    rgb(var(--c-accent) / 0.14),
+    rgb(var(--c-violet) / 0.14)
+  );
+  background-size: 300% 300%;
+  animation: legendary-sweep 2.6s ease-in-out;
+}
+
+@keyframes legendary-sweep {
+  0% {
+    opacity: 0;
+    background-position: 0% 50%;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: 100% 50%;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Movimento reduzido                                                  */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
