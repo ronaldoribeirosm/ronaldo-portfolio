@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { profile, ui } from '@/data/content';
@@ -29,6 +29,7 @@ export default function Contact() {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
+  const honeypot = useRef<HTMLInputElement>(null); // armadilha anti-bot (campo oculto)
 
   const validate = (f: Fields): Errors => {
     const e: Errors = {};
@@ -54,15 +55,32 @@ export default function Contact() {
       return;
     }
 
+    // bot preencheu o campo oculto: finge sucesso e não envia nada
+    if (honeypot.current?.value) {
+      setStatus('done');
+      return;
+    }
+
     setStatus('sending');
     try {
       if (ENDPOINT) {
         const res = await fetch(ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(fields),
+          body: JSON.stringify({
+            name: fields.name,
+            email: fields.email,
+            subject: fields.subject,
+            message: fields.message,
+            // campos especiais reconhecidos pelo Formspree
+            _subject: fields.subject || `Contato de ${fields.name}`,
+            _replyto: fields.email,
+          }),
         });
-        if (!res.ok) throw new Error('request failed');
+        if (!res.ok) {
+          const data = (await res.json().catch(() => null)) as { errors?: { message: string }[] } | null;
+          throw new Error(data?.errors?.[0]?.message ?? 'request failed');
+        }
       } else {
         // Sem backend configurado: compõe um e-mail no cliente de e-mail do usuário.
         const subject = encodeURIComponent(fields.subject || `Contato de ${fields.name}`);
@@ -126,6 +144,17 @@ export default function Contact() {
                 exit={{ opacity: 0 }}
                 className="flex flex-col gap-4"
               >
+                {/* honeypot: invisível para humanos, atrai bots */}
+                <input
+                  ref={honeypot}
+                  type="text"
+                  name="_gotcha"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute left-[-9999px] h-0 w-0 opacity-0"
+                />
+
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     id="name"
