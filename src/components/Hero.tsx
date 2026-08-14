@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { profile, ui } from '@/data/content';
+import { customAssets, asset } from '@/data/assets';
 import { useT } from '@/lib/i18n';
 import { useGame, levelInfo } from '@/store/game';
 import { playSfx } from '@/lib/sound';
@@ -140,8 +141,19 @@ function Row({ label, value, accent, span }: { label: string; value: string; acc
   );
 }
 
-/** Pequeno avatar pixel autoral (não representa nenhuma marca). */
+/** Avatar do jogador: usa imagem personalizada se definida, senão o pixel autoral. */
 function PixelAvatar() {
+  const custom = asset(customAssets.heroAvatar);
+  if (custom) {
+    return (
+      <img
+        src={custom}
+        alt=""
+        className="h-16 w-16 shrink-0 object-contain [image-rendering:pixelated]"
+        aria-hidden
+      />
+    );
+  }
   return (
     <svg viewBox="0 0 16 16" className="h-16 w-16 shrink-0" shapeRendering="crispEdges" aria-hidden>
       <rect width="16" height="16" fill="rgb(var(--c-bg))" />

@@ -1,9 +1,12 @@
 # Ronaldo Ribeiro — Portfolio Arcade
 
 Portfolio pessoal de **Ronaldo Ribeiro**, desenvolvedor full stack, construído como uma
-experiência interativa em estética arcade retrô. Em vez de uma página estática, o visitante
+experiência interativa em estética arcade retrô. Em vez de uma página estática, quem entra
 "joga" pelo portfolio: ganha XP, sobe de nível e desbloqueia conquistas enquanto conhece os
 projetos, as skills e a trajetória — sempre com o conteúdo profissional em primeiro plano.
+
+> Projeto pessoal e privado. Toda a arte e os sons que vêm no repositório são autorais; há um
+> sistema de troca para você usar seus próprios sprites/áudios (ver *Assets pessoais*).
 
 ![Hero](docs/screenshots/desktop-hero.png)
 
@@ -33,15 +36,17 @@ publicar.
 - **Projetos** em grade de cartuchos, com filtros por categoria e modal de detalhes (com foco preso e fechamento por `Esc`).
 - **Skills** agrupadas por área, com barras de status que preenchem ao entrar na tela.
 - **Jornada** em timeline vertical com checkpoints.
-- **Contato** em estilo terminal, com validação inline e tela de sucesso; envia via endpoint configurável ou `mailto`.
+- **Contato** em estilo terminal, com validação inline, honeypot anti-bot e tela de sucesso; envia via Formspree (endpoint configurável) ou `mailto`.
+- **Cena de captura**: ao abrir um projeto, uma cápsula é "lançada" com um "CAPTURADO!/GOTCHA!".
+- **Mini-game** "Caça-Bugs" jogável (easter egg: 3 cliques no logo) — captura bugs e ganha XP.
 - **Gamificação**: XP, níveis, 8 conquistas e aviso de "level up", tudo persistido no navegador.
 - **Bilíngue** (PT/EN), **dois temas** (Retro / Cyber) e **som chiptune** sintetizado (desligado por padrão).
 - **Easter egg**: o código clássico de arcade (↑ ↑ ↓ ↓ ← → ← → B A) libera o modo lendário.
 - **Companheiro pixel** que segue o cursor (só em telas grandes, respeitando `prefers-reduced-motion`).
 
-| Grade de projetos | Contato |
+| Grade de projetos | Mini-game "Caça-Bugs" |
 | --- | --- |
-| ![Projetos](docs/screenshots/desktop-projects.png) | ![Contato](docs/screenshots/desktop-contact.png) |
+| ![Projetos](docs/screenshots/desktop-projects.png) | ![Mini-game](docs/screenshots/minigame-playing.png) |
 
 ## Stack
 
@@ -91,8 +96,16 @@ flowchart TD
 
 - **Conteúdo e traduções**: tudo em [`src/data/content.ts`](src/data/content.ts) — perfil, projetos, skills, experiência, conquistas e textos de interface (PT/EN). Não é preciso mexer nos componentes.
 - **Links pessoais**: objeto `profile.links` no mesmo arquivo.
-- **Formulário de contato**: crie um `.env` (veja `.env.example`) e defina `VITE_CONTACT_ENDPOINT` (ex.: [Formspree](https://formspree.io/), [Web3Forms](https://web3forms.com/)) para receber os envios direto; sem isso, o formulário usa `mailto`.
+- **Formulário de contato**: crie um `.env` (veja `.env.example`) e defina `VITE_CONTACT_ENDPOINT` (ex.: [Formspree](https://formspree.io/)) para receber os envios direto; sem isso, o formulário usa `mailto`.
 - **Cores e temas**: tokens em [`src/index.css`](src/index.css) (`:root` para Retro, `[data-theme='cyber']` para Cyber).
+
+### Assets pessoais (sprites e sons)
+
+Quer usar seus próprios sprites e efeitos sonoros? Coloque os arquivos em
+[`public/assets/`](public/assets/) e aponte os caminhos em
+[`src/data/assets.ts`](src/data/assets.ts). Dá para trocar o avatar do jogador, o companheiro
+que segue o cursor e cada efeito sonoro. Onde ficar em branco, o site usa a arte e o som
+autorais que já vêm no projeto. Detalhes em [`public/assets/README.md`](public/assets/README.md).
 
 ## Créditos
 

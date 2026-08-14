@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { profile, ui } from '@/data/content';
 import { useT } from '@/lib/i18n';
@@ -14,13 +14,34 @@ const NAV = [
   { id: 'contact', label: ui.nav.contact },
 ] as const;
 
-export default function Header() {
+interface HeaderProps {
+  onSecret: () => void;
+}
+
+export default function Header({ onSecret }: HeaderProps) {
   const { t, lang } = useT();
   const { xp, soundEnabled, theme, toggleSound, toggleTheme, toggleLang } = useGame();
   const lvl = levelInfo(xp);
   const [active, setActive] = useState<string>('hero');
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const logoClicks = useRef<{ n: number; timer: number }>({ n: 0, timer: 0 });
+
+  const handleLogoClick = () => {
+    go('hero');
+    const state = logoClicks.current;
+    state.n += 1;
+    window.clearTimeout(state.timer);
+    if (state.n >= 3) {
+      state.n = 0;
+      playSfx('secret');
+      onSecret();
+      return;
+    }
+    state.timer = window.setTimeout(() => {
+      state.n = 0;
+    }, 600);
+  };
 
   // scrollspy leve: descobre a seção mais próxima do topo
   useEffect(() => {
@@ -66,7 +87,7 @@ export default function Header() {
           href="#hero"
           onClick={(e) => {
             e.preventDefault();
-            go('hero');
+            handleLogoClick();
           }}
           className="group flex items-center gap-2.5"
           aria-label={`${profile.handle} — início`}

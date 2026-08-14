@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { projects } from '@/data/content';
+import { customAssets } from '@/data/assets';
 import { useGame } from '@/store/game';
-import { setSoundEnabled } from '@/lib/sound';
+import { setSoundEnabled, registerSamples } from '@/lib/sound';
 import { VisitContext } from '@/components/Section';
 
 import Header from '@/components/Header';
@@ -13,6 +14,7 @@ import Experience from '@/components/Experience';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
+import MiniGame from '@/components/MiniGame';
 import AchievementToasts from '@/components/hud/AchievementToasts';
 import LevelUpFlash from '@/components/hud/LevelUpFlash';
 import KonamiListener from '@/components/effects/KonamiListener';
@@ -29,6 +31,7 @@ export default function App() {
 
   const visited = useRef<Set<string>>(new Set());
   const opened = useRef<Set<string>>(new Set());
+  const [miniOpen, setMiniOpen] = useState(false);
 
   // aplica tema e idioma no documento
   useEffect(() => {
@@ -37,6 +40,11 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('lang', lang === 'pt' ? 'pt-BR' : 'en');
   }, [lang]);
+
+  // registra amostras de áudio personalizadas (se houver)
+  useEffect(() => {
+    if (customAssets.sfx) registerSamples(customAssets.sfx);
+  }, []);
 
   // mantém o motor de áudio em sincronia com o estado salvo
   useEffect(() => {
@@ -79,7 +87,7 @@ export default function App() {
         Pular para o conteúdo
       </a>
 
-      <Header />
+      <Header onSecret={() => setMiniOpen(true)} />
 
       <main>
         <Hero />
@@ -91,6 +99,9 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Mini-game (easter egg: 3 cliques no logo) */}
+      <MiniGame open={miniOpen} onClose={() => setMiniOpen(false)} />
 
       {/* HUD e efeitos */}
       <AchievementToasts />

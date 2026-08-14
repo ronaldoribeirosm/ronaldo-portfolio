@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useIdle, usePrefersReducedMotion } from '@/lib/hooks';
+import { customAssets, asset } from '@/data/assets';
 
 /**
  * Companheiro pixel autoral que segue o cursor com atraso elástico.
@@ -11,6 +12,7 @@ export default function SpriteCompanion() {
   const reduced = usePrefersReducedMotion();
   const idle = useIdle(3200);
   const [enabled, setEnabled] = useState(false);
+  const companionImg = asset(customAssets.companion);
 
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
@@ -49,6 +51,13 @@ export default function SpriteCompanion() {
         transition={{ duration: idle ? 3 : 1.8, repeat: Infinity, ease: 'easeInOut' }}
         className="relative"
       >
+        {companionImg ? (
+          <img
+            src={companionImg}
+            alt=""
+            className="h-8 w-8 object-contain drop-shadow-[0_0_8px_rgb(var(--c-primary)/0.6)] [image-rendering:pixelated]"
+          />
+        ) : (
         <svg viewBox="0 0 16 16" className="h-7 w-7 drop-shadow-[0_0_8px_rgb(var(--c-primary)/0.6)]" shapeRendering="crispEdges">
           {/* corpo do drone */}
           <rect x="4" y="4" width="8" height="7" fill="rgb(var(--c-surface-2))" stroke="rgb(var(--c-primary))" />
@@ -61,6 +70,7 @@ export default function SpriteCompanion() {
           <rect x="5" y="11" width="2" height="2" fill="rgb(var(--c-secondary))" />
           <rect x="9" y="11" width="2" height="2" fill="rgb(var(--c-secondary))" />
         </svg>
+        )}
 
         {/* z's quando ocioso */}
         {idle && (

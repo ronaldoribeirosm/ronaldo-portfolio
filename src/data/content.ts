@@ -487,12 +487,13 @@ export const ui = {
   },
 
   projects: {
-    title: { pt: 'Projetos', en: 'Projects' },
+    title: { pt: 'Codex de Projetos', en: 'Project Codex' },
     subtitle: {
-      pt: 'Cada um resolveu um problema de verdade. Abra para ver os detalhes.',
-      en: 'Each one solved a real problem. Open to see the details.',
+      pt: 'Um projeto selvagem apareceu! Capture cada um para ler a ficha completa.',
+      en: 'A wild project appeared! Capture each one to read its full entry.',
     },
-    open: { pt: 'Abrir', en: 'Open' },
+    open: { pt: 'Capturar', en: 'Capture' },
+    gotcha: { pt: 'CAPTURADO!', en: 'GOTCHA!' },
     viewCode: { pt: 'Código', en: 'Code' },
     viewDemo: { pt: 'Demo', en: 'Demo' },
     stack: { pt: 'Stack', en: 'Stack' },
@@ -549,6 +550,22 @@ export const ui = {
     achievements: { pt: 'Conquistas', en: 'Achievements' },
     unlocked: { pt: 'desbloqueada', en: 'unlocked' },
     progress: { pt: 'Progresso', en: 'Progress' },
+  },
+
+  minigame: {
+    title: { pt: 'Caça-Bugs', en: 'Bug Hunt' },
+    intro: {
+      pt: 'Mova com o mouse ou ← → e capture os bugs antes que escapem. Você tem 30s!',
+      en: 'Move with the mouse or ← → and catch the bugs before they escape. You have 30s!',
+    },
+    start: { pt: 'Começar', en: 'Start' },
+    replay: { pt: 'Jogar de novo', en: 'Play again' },
+    close: { pt: 'Sair', en: 'Quit' },
+    score: { pt: 'Pontos', en: 'Score' },
+    time: { pt: 'Tempo', en: 'Time' },
+    result: { pt: 'Bugs capturados', en: 'Bugs caught' },
+    reward: { pt: 'Recompensa', en: 'Reward' },
+    hintFound: { pt: 'Você encontrou o mini-game!', en: 'You found the mini-game!' },
   },
 
   footer: {

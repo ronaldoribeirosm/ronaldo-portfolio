@@ -9,6 +9,7 @@ import { categoryColor, textColor, borderHover, barColor } from '@/lib/projectSt
 import Section from '@/components/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import ProjectModal from '@/components/ProjectModal';
+import CaptureFx from '@/components/effects/CaptureFx';
 
 interface ProjectsProps {
   onOpenProject: (id: string) => void;
@@ -19,6 +20,7 @@ export default function Projects({ onOpenProject }: ProjectsProps) {
   const reduced = usePrefersReducedMotion();
   const [filter, setFilter] = useState<ProjectCategory | 'all'>('all');
   const [selected, setSelected] = useState<Project | null>(null);
+  const [capturing, setCapturing] = useState<number | null>(null);
 
   const visible = useMemo(
     () => (filter === 'all' ? projects : projects.filter((p) => p.category === filter)),
@@ -26,9 +28,19 @@ export default function Projects({ onOpenProject }: ProjectsProps) {
   );
 
   const open = (p: Project) => {
-    setSelected(p);
     onOpenProject(p.id);
-    playSfx('open');
+    playSfx('coin');
+    if (reduced) {
+      setSelected(p);
+      return;
+    }
+    // pequena cena de "captura" antes de abrir a ficha
+    const key = Date.now();
+    setCapturing(key);
+    window.setTimeout(() => {
+      setSelected(p);
+      setCapturing((c) => (c === key ? null : c));
+    }, 680);
   };
 
   return (
@@ -122,6 +134,7 @@ export default function Projects({ onOpenProject }: ProjectsProps) {
         </motion.ul>
       )}
 
+      {capturing !== null && <CaptureFx key={capturing} />}
       <ProjectModal project={selected} onClose={() => setSelected(null)} />
     </Section>
   );

@@ -96,8 +96,40 @@ export function isSoundEnabled() {
   return enabled;
 }
 
+// Amostras de áudio personalizadas (opcionais), registradas em runtime.
+const samples: Partial<Record<SfxName, string>> = {};
+const audioCache = new Map<string, HTMLAudioElement>();
+
+/** Registra arquivos de áudio para substituir os efeitos sintetizados. */
+export function registerSamples(map: Partial<Record<SfxName, string>>) {
+  for (const [key, value] of Object.entries(map)) {
+    if (value) samples[key as SfxName] = value;
+  }
+}
+
+function playSample(src: string) {
+  let base = audioCache.get(src);
+  if (!base) {
+    base = new Audio(src);
+    base.preload = 'auto';
+    audioCache.set(src, base);
+  }
+  // clona para permitir sobreposição de disparos rápidos
+  const node = base.cloneNode(true) as HTMLAudioElement;
+  node.volume = 0.6;
+  void node.play().catch(() => {});
+}
+
 export function playSfx(name: SfxName) {
   if (!enabled) return;
+
+  // usa a amostra personalizada, se houver
+  const sample = samples[name];
+  if (sample) {
+    playSample(sample);
+    return;
+  }
+
   const c = ensureContext();
   if (!c || !master) return;
   if (c.state === 'suspended') void c.resume();
