@@ -109,8 +109,11 @@ autorais que já vêm no projeto. Detalhes em [`public/assets/README.md`](public
 
 ## Créditos
 
-- Tipografia: [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) e [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) (Google Fonts, SIL Open Font License).
-- Pixel art, sons e demais elementos visuais são autorais.
+- Sprites e efeitos sonoros: **[Kenney](https://kenney.nl/)** (Pixel Platformer, Interface Sounds, Digital Audio) — licença **CC0**.
+- Tipografia: [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P), [VT323](https://fonts.google.com/specimen/VT323) e [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) (SIL Open Font License).
+- Efeitos chiptune sintetizados (fallback) e demais elementos de UI são autorais.
+
+Detalhes em [CREDITS.md](CREDITS.md).
 
 ## Licença
 

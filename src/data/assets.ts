@@ -26,10 +26,30 @@ export interface CustomAssets {
 }
 
 export const customAssets: CustomAssets = {
-  heroAvatar: '',
-  companion: '',
-  sfx: {},
+  // Sprites do Kenney "Pixel Platformer" (CC0). Troque livremente.
+  heroAvatar: '/assets/sprites/hero.png',
+  companion: '/assets/sprites/companion.png',
+  // Sons do Kenney "Interface Sounds" / "Digital Audio" (CC0).
+  sfx: {
+    select: '/assets/audio/select.ogg',
+    hover: '/assets/audio/hover.ogg',
+    open: '/assets/audio/open.ogg',
+    coin: '/assets/audio/coin.ogg',
+    levelup: '/assets/audio/levelup.ogg',
+    achievement: '/assets/audio/achievement.ogg',
+    error: '/assets/audio/error.ogg',
+    victory: '/assets/audio/victory.ogg',
+    secret: '/assets/audio/secret.ogg',
+  },
 };
+
+/** Sprites de "bug" usados no mini-game (Kenney, CC0). Vazio = usa o desenho autoral. */
+export const bugSprites: string[] = [
+  '/assets/sprites/bug1.png',
+  '/assets/sprites/bug2.png',
+  '/assets/sprites/bug3.png',
+  '/assets/sprites/bug4.png',
+];
 
 /** Normaliza para `undefined` quando o caminho está vazio. */
 export function asset(path?: string): string | undefined {

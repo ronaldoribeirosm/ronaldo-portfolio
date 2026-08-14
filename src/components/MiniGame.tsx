@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ui } from '@/data/content';
+import { bugSprites } from '@/data/assets';
 import { useT } from '@/lib/i18n';
 import { useGame } from '@/store/game';
 import { playSfx } from '@/lib/sound';
@@ -17,6 +18,7 @@ interface Bug {
   vy: number;
   hue: number;
   wob: number;
+  sprite: number;
 }
 
 type Phase = 'ready' | 'playing' | 'over';
@@ -42,6 +44,16 @@ export default function MiniGame({ open, onClose }: Props) {
   const running = useRef(false);
   const keys = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
   const scoreRef = useRef(0);
+  const bugImgs = useRef<HTMLImageElement[]>([]);
+
+  // pré-carrega os sprites de bug (se houver)
+  useEffect(() => {
+    bugImgs.current = bugSprites.map((src) => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+  }, []);
 
   const stopLoop = useCallback(() => {
     running.current = false;
@@ -115,6 +127,7 @@ export default function MiniGame({ open, onClose }: Props) {
           vy: 0.06 + Math.random() * 0.05 + scoreRef.current * 0.002,
           hue: [0, 45, 160, 285][Math.floor(Math.random() * 4)],
           wob: Math.random() * Math.PI * 2,
+          sprite: Math.floor(Math.random() * Math.max(1, bugImgs.current.length)),
         });
       }
 
@@ -159,17 +172,23 @@ export default function MiniGame({ open, onClose }: Props) {
       }
       ctx.globalAlpha = 1;
 
-      // bugs (quadradinho com pernas e olhos)
+      // bugs: usa sprite do Kenney se carregado, senão desenho autoral
+      ctx.imageSmoothingEnabled = false;
       for (const b of bugs.current) {
         const bx = b.x + Math.sin(b.wob) * 6;
-        ctx.fillStyle = `hsl(${b.hue} 85% 62%)`;
-        ctx.fillRect(bx - 6, b.y - 6, 12, 12);
-        ctx.fillStyle = ink;
-        ctx.fillRect(bx - 3, b.y - 3, 2, 2);
-        ctx.fillRect(bx + 1, b.y - 3, 2, 2);
-        ctx.fillStyle = `hsl(${b.hue} 85% 62%)`;
-        ctx.fillRect(bx - 9, b.y - 2, 3, 2);
-        ctx.fillRect(bx + 6, b.y - 2, 3, 2);
+        const img = bugImgs.current[b.sprite];
+        if (img && img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, Math.round(bx - 11), Math.round(b.y - 11), 22, 22);
+        } else {
+          ctx.fillStyle = `hsl(${b.hue} 85% 62%)`;
+          ctx.fillRect(bx - 6, b.y - 6, 12, 12);
+          ctx.fillStyle = ink;
+          ctx.fillRect(bx - 3, b.y - 3, 2, 2);
+          ctx.fillRect(bx + 1, b.y - 3, 2, 2);
+          ctx.fillStyle = `hsl(${b.hue} 85% 62%)`;
+          ctx.fillRect(bx - 9, b.y - 2, 3, 2);
+          ctx.fillRect(bx + 6, b.y - 2, 3, 2);
+        }
       }
 
       // catcher (rede)
@@ -262,7 +281,7 @@ export default function MiniGame({ open, onClose }: Props) {
               </button>
             </div>
 
-            <div className="mb-3 flex items-center justify-between font-pixel text-[0.6rem]">
+            <div className="mb-3 flex items-center justify-between font-crt text-xl leading-none">
               <span className="text-dim">
                 {t(ui.minigame.score)}: <span className="text-accent">{score}</span>
               </span>

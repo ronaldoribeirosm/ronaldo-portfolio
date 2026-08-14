@@ -111,11 +111,11 @@ export default function Contact() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         {/* console/formulário */}
         <div className="scanlines panel relative min-h-[24rem] p-5 sm:p-7">
-          <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 font-pixel text-[0.6rem] text-dim">
+          <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 text-dim">
             <span className="h-2 w-2 bg-danger" />
             <span className="h-2 w-2 bg-accent" />
             <span className="h-2 w-2 bg-grass" />
-            <span className="ml-2">contato.exe</span>
+            <span className="ml-2 font-crt text-lg leading-none text-primary">~/contato.exe</span>
           </div>
 
           <AnimatePresence mode="wait">

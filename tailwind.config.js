@@ -20,6 +20,7 @@ export default {
       fontFamily: {
         pixel: ['"Press Start 2P"', 'monospace'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        crt: ['"VT323"', '"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
         glow: '0 0 0 1px rgb(var(--c-primary) / 0.4), 0 0 24px -6px rgb(var(--c-primary) / 0.55)',

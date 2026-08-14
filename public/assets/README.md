@@ -32,4 +32,12 @@ export const customAssets: CustomAssets = {
 
 Onde ficar em branco, o site usa a arte e o som autorais que já vêm no projeto.
 
-> Projeto pessoal e privado: os assets que você adicionar aqui são sua escolha.
+## O que já vem incluído
+
+- `sprites/` — personagens do **Kenney Pixel Platformer** (CC0): `hero.png`, `companion.png` e `bug1..4.png` (mini-game).
+- `audio/` — efeitos do **Kenney Interface Sounds / Digital Audio** (CC0), nomeados por função (`select`, `coin`, `levelup`, …).
+
+Tudo CC0 (domínio público) — pode trocar, remover ou substituir pelos seus arquivos à vontade.
+Se limpar os caminhos em `src/data/assets.ts`, o site volta à arte e ao som autorais (chiptune sintetizado).
+
+> Projeto pessoal e privado: os assets são sua escolha.
