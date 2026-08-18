@@ -44,7 +44,7 @@ export default function Projects({ onOpenProject }: ProjectsProps) {
   };
 
   return (
-    <Section id="projects">
+    <Section id="projects" scene="projects">
       <SectionHeading index="02" title={t(ui.projects.title)} subtitle={t(ui.projects.subtitle)} />
 
       {/* filtros */}

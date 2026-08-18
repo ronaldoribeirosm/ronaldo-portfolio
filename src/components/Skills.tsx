@@ -24,7 +24,7 @@ export default function Skills() {
   const { t } = useT();
 
   return (
-    <Section id="skills">
+    <Section id="skills" scene="skills">
       <SectionHeading index="03" title={t(ui.skills.title)} subtitle={t(ui.skills.subtitle)} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

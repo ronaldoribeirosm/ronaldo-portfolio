@@ -21,6 +21,7 @@
   --c-violet: 79 209 197; /* teal de destaque */
   --c-grass: 123 209 168; /* menta */
   --c-danger: 244 63 94; /* rosa-vermelho */
+  --c-on-primary: 30 19 39; /* texto sobre botões terracota (escuro nos 2 temas) */
 
   --grid-alpha: 0.04;
   --scan-alpha: 0.05;
@@ -37,23 +38,30 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-:root[data-theme='cyber'] {
-  /* Tema CYBER — mesma serra, mais tarde da noite: plum profundo, neon mais quente */
-  --c-bg: 14 9 22;
-  --c-surface: 26 15 36;
-  --c-surface-2: 38 22 52;
-  --c-line: 58 36 78;
-  --c-ink: 253 240 232;
-  --c-dim: 210 186 204;
+:root[data-theme='light'] {
+  /* Tema CLARO — dia na Mantiqueira: céu, verde, terracota. Texto escuro. */
+  --c-bg: 225 234 238;
+  --c-surface: 247 250 252;
+  --c-surface-2: 226 235 240;
+  --c-line: 190 203 212;
+  --c-ink: 38 26 44; /* plum escuro */
+  --c-dim: 92 82 100;
 
-  --c-primary: 255 132 96;
-  --c-secondary: 225 72 155;
-  --c-accent: 255 190 90;
-  --c-violet: 69 224 210;
-  --c-grass: 120 224 172;
+  --c-primary: 210 84 47; /* terracota mais profunda p/ contraste no claro */
+  --c-secondary: 178 58 126;
+  --c-accent: 176 116 24; /* âmbar escuro (legível como texto) */
+  --c-violet: 20 140 132; /* teal */
+  --c-grass: 26 150 100; /* verde */
+  --c-danger: 200 40 70;
+  --c-on-primary: 255 246 235; /* texto claro sobre terracota profunda */
 
-  --grid-alpha: 0.06;
-  --scan-alpha: 0.08;
+  --grid-alpha: 0.05;
+  --scan-alpha: 0.03;
+}
+
+/* No tema claro, o "neon" vira só um leve relevo (glow forte fica estranho em fundo claro) */
+:root[data-theme='light'] .neon {
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.06);
 }
 
 /* ------------------------------------------------------------------ */
@@ -212,7 +220,7 @@ p {
   }
 
   .btn-primary {
-    color: rgb(var(--c-bg));
+    color: rgb(var(--c-on-primary));
     background: rgb(var(--c-primary));
     border-color: rgb(var(--c-primary));
   }

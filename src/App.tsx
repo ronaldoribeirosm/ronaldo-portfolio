@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { projects } from '@/data/content';
-import { customAssets } from '@/data/assets';
+import { customAssets, asset } from '@/data/assets';
 import { useGame } from '@/store/game';
 import { setSoundEnabled, registerSamples } from '@/lib/sound';
 import { VisitContext } from '@/components/Section';
@@ -26,7 +26,6 @@ export default function App() {
   const theme = useGame((s) => s.theme);
   const lang = useGame((s) => s.lang);
   const soundEnabled = useGame((s) => s.soundEnabled);
-  const addXp = useGame((s) => s.addXp);
   const unlock = useGame((s) => s.unlock);
 
   const visited = useRef<Set<string>>(new Set());
@@ -43,7 +42,12 @@ export default function App() {
 
   // registra amostras de áudio personalizadas (se houver)
   useEffect(() => {
-    if (customAssets.sfx) registerSamples(customAssets.sfx);
+    if (customAssets.sfx) {
+      const resolved = Object.fromEntries(
+        Object.entries(customAssets.sfx).map(([k, v]) => [k, asset(v)]),
+      ) as Parameters<typeof registerSamples>[0];
+      registerSamples(resolved);
+    }
   }, []);
 
   // mantém o motor de áudio em sincronia com o estado salvo
@@ -61,21 +65,19 @@ export default function App() {
     (id: string) => {
       if (visited.current.has(id)) return;
       visited.current.add(id);
-      addXp(120);
       if (id === 'contact') unlock('challenger');
       if (NAV_SECTIONS.every((s) => visited.current.has(s))) unlock('explorer');
     },
-    [addXp, unlock],
+    [unlock],
   );
 
   const openProject = useCallback(
     (id: string) => {
       if (opened.current.has(id)) return;
       opened.current.add(id);
-      addXp(80);
       if (opened.current.size >= projects.length) unlock('collector');
     },
-    [addXp, unlock],
+    [unlock],
   );
 
   return (

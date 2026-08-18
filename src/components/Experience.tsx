@@ -10,7 +10,7 @@ export default function Experience() {
   const reduced = usePrefersReducedMotion();
 
   return (
-    <Section id="experience">
+    <Section id="experience" scene="experience">
       <SectionHeading index="04" title={t(ui.experience.title)} subtitle={t(ui.experience.subtitle)} />
 
       <ol className="relative ml-3 border-l-2 border-line sm:ml-4">

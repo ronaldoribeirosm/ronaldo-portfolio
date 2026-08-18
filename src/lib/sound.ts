@@ -89,6 +89,9 @@ export function setSoundEnabled(value: boolean) {
     const c = ensureContext();
     // navegadores exigem retomar o contexto após um gesto do usuário
     if (c && c.state === 'suspended') void c.resume();
+    startMusic();
+  } else {
+    stopMusic();
   }
 }
 
@@ -154,5 +157,121 @@ export function playSfx(name: SfxName) {
     g.connect(master);
     osc.start(t0);
     osc.stop(t0 + note.dur + 0.02);
+  }
+}
+
+/* ------------------------------------------------------------------ música ---
+ * Trilha chiptune AUTORAL, tranquila e num volume de fundo (bem abaixo dos
+ * efeitos). Progressão gentil Am–F–C–G com melodia pentatônica em triângulo,
+ * arpejo suave (seno) e um baixo macio. Tudo sintetizado — nada de arquivos.
+ * Toca em loop enquanto o som está ligado. */
+const N = {
+  F2: 87.31, G2: 98.0, A2: 110.0, C3: 130.81,
+  A3: 220.0, C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, A4: 440.0,
+  C5: 523.25, D5: 587.33,
+};
+const BAR = 2.0; // s por compasso (~120bpm, sensação calma pela textura esparsa)
+
+interface MNote { t: number; freq: number; dur: number; type: Voice; gain: number }
+
+const MUSIC_LOOP: { notes: MNote[]; length: number } = (() => {
+  const notes: MNote[] = [];
+  const bass = [N.A2, N.F2, N.C3, N.G2, N.A2, N.F2, N.C3, N.G2]; // Am F C G x2
+  bass.forEach((f, bar) =>
+    notes.push({ t: bar * BAR, freq: f, dur: BAR * 0.95, type: 'triangle', gain: 0.09 }),
+  );
+  // arpejo suave (seno) — tônicas dos acordes, evitando notas ásperas
+  const arp = [
+    [N.A3, N.C4, N.E4, N.C4], [N.A3, N.C4, N.F4, N.C4],
+    [N.C4, N.E4, N.G4, N.E4], [N.G4, N.D4, N.G4, N.D4],
+  ];
+  for (let bar = 0; bar < 8; bar++) {
+    arp[bar % 4].forEach((f, i) =>
+      notes.push({ t: bar * BAR + i * (BAR / 4), freq: f, dur: 0.5, type: 'sine', gain: 0.05 }),
+    );
+  }
+  // melodia pentatônica (triângulo), esparsa e cantável
+  const mel: [number, number, number, number][] = [ // [compasso, offset(s), freq, dur]
+    [0, 0, N.E4, 0.5], [0, 0.5, N.A4, 0.5], [0, 1.0, N.C5, 0.75],
+    [1, 0, N.C5, 0.5], [1, 0.5, N.A4, 0.5], [1, 1.0, N.F4, 0.9],
+    [2, 0, N.E4, 0.5], [2, 0.5, N.G4, 0.5], [2, 1.0, N.C5, 0.9],
+    [3, 0, N.D5, 0.5], [3, 0.5, N.G4, 0.5], [3, 1.0, N.D4, 0.9],
+    [4, 0, N.A4, 0.75], [4, 0.75, N.E4, 0.5], [4, 1.25, N.D4, 0.5],
+    [5, 0, N.C4, 0.5], [5, 0.5, N.F4, 0.5], [5, 1.0, N.A4, 0.9],
+    [6, 0, N.G4, 0.5], [6, 0.5, N.E4, 0.5], [6, 1.0, N.C4, 0.9],
+    [7, 0, N.D4, 0.5], [7, 0.5, N.G4, 0.5], [7, 1.0, N.E4, 1.1],
+  ];
+  for (const [bar, off, freq, dur] of mel) {
+    notes.push({ t: bar * BAR + off, freq, dur, type: 'triangle', gain: 0.085 });
+  }
+  return { notes, length: 8 * BAR };
+})();
+
+let musicGain: GainNode | null = null;
+let musicOn = false;
+let musicTimer: number | null = null;
+let nextLoopAt = 0;
+const MUSIC_LEVEL = 0.55;
+
+function scheduleLoop(c: AudioContext, at: number) {
+  if (!musicGain) return;
+  for (const n of MUSIC_LOOP.notes) {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = n.type;
+    osc.frequency.value = n.freq;
+    const t0 = at + n.t;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(n.gain, t0 + 0.03); // ataque macio
+    g.gain.setValueAtTime(n.gain, t0 + Math.max(0.05, n.dur - 0.15));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.dur);
+    osc.connect(g);
+    g.connect(musicGain);
+    osc.start(t0);
+    osc.stop(t0 + n.dur + 0.05);
+  }
+}
+
+export function startMusic() {
+  const c = ensureContext();
+  if (!c || !master) return;
+  if (!musicGain) {
+    musicGain = c.createGain();
+    musicGain.gain.value = 0;
+    musicGain.connect(master);
+  }
+  if (c.state === 'suspended') void c.resume();
+  // fade-in suave para o volume de fundo
+  musicGain.gain.cancelScheduledValues(c.currentTime);
+  musicGain.gain.setValueAtTime(musicGain.gain.value, c.currentTime);
+  musicGain.gain.linearRampToValueAtTime(MUSIC_LEVEL, c.currentTime + 1.0);
+  if (musicOn) return;
+  musicOn = true;
+  nextLoopAt = c.currentTime + 0.2;
+  const pump = () => {
+    if (!musicOn || !ctx) return;
+    if (ctx.state === 'running') {
+      // ressincroniza se o relógio ficou parado (contexto suspenso antes)
+      if (nextLoopAt < ctx.currentTime + 0.2) nextLoopAt = ctx.currentTime + 0.2;
+      while (nextLoopAt < ctx.currentTime + MUSIC_LOOP.length * 1.5) {
+        scheduleLoop(ctx, nextLoopAt);
+        nextLoopAt += MUSIC_LOOP.length;
+      }
+    }
+    musicTimer = window.setTimeout(pump, MUSIC_LOOP.length * 500);
+  };
+  pump();
+}
+
+export function stopMusic() {
+  musicOn = false;
+  if (musicTimer) {
+    clearTimeout(musicTimer);
+    musicTimer = null;
+  }
+  if (musicGain && ctx) {
+    musicGain.gain.cancelScheduledValues(ctx.currentTime);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, ctx.currentTime);
+    musicGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4); // fade-out
   }
 }

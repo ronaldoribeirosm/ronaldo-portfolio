@@ -10,8 +10,8 @@ import ParallaxScene from '@/components/effects/ParallaxScene';
 
 export default function Hero() {
   const { t, lang } = useT();
-  const xp = useGame((s) => s.xp);
-  const lvl = levelInfo(xp);
+  const unlocked = useGame((s) => s.unlocked);
+  const lvl = levelInfo(unlocked);
   const reduced = usePrefersReducedMotion();
 
   const roles =
@@ -104,9 +104,9 @@ export default function Hero() {
 
           <div className="mt-4 border-t border-line pt-4">
             <div className="flex items-center justify-between text-xs text-dim">
-              <span>{t(ui.hud.xp)}</span>
+              <span>{t(ui.hud.achievements)}</span>
               <span className="font-pixel text-[0.55rem] tabular-nums text-accent">
-                {lvl.level >= 20 ? 'MAX' : `${lvl.intoLevel}/${lvl.need}`}
+                {lvl.atMax ? 'MAX' : `${lvl.level}/${lvl.total}`}
               </span>
             </div>
             <div className="mt-1.5 h-2.5 w-full overflow-hidden border border-line bg-surface-2">

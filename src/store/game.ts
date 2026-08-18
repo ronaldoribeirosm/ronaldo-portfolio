@@ -3,48 +3,36 @@ import { persist } from 'zustand/middleware';
 import { achievements, type Achievement, type AchievementId, type Lang } from '@/data/content';
 import { playSfx, setSoundEnabled } from '@/lib/sound';
 
-export type Theme = 'retro' | 'cyber';
+export type Theme = 'dark' | 'light'; // dark = noite, light = dia
 
-export const MAX_LEVEL = 20;
+/**
+ * O nível agora é atrelado às conquistas: cada conquista "colecionável" vale um
+ * nível e, ao reunir todas, chega-se ao nível máximo (que desbloqueia a coroa).
+ * A conquista `maxed` é a recompensa do topo e não conta como nível.
+ */
+const LEVELING_IDS: AchievementId[] = achievements
+  .map((a) => a.id)
+  .filter((id) => id !== 'maxed');
 
-/** Limiares cumulativos de XP para cada nível (índice = nível - 1). */
-const LEVEL_THRESHOLDS: number[] = (() => {
-  const thresholds = [0];
-  let acc = 0;
-  for (let level = 1; level < MAX_LEVEL; level++) {
-    const gap = 90 + (level - 1) * 12; // curva suave: completar o site chega ao nível máximo
-    acc += gap;
-    thresholds.push(acc);
-  }
-  return thresholds;
-})();
+export const MAX_LEVEL = LEVELING_IDS.length;
 
 export interface LevelInfo {
   level: number;
-  intoLevel: number;
-  need: number;
-  progress: number; // 0..1 dentro do nível atual
+  total: number;
+  progress: number; // 0..1 = conquistas / total
+  atMax: boolean;
 }
 
-export function levelInfo(xp: number): LevelInfo {
-  let level = 1;
-  for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-    if (xp >= LEVEL_THRESHOLDS[i]) level = i + 1;
-  }
-  if (level >= MAX_LEVEL) {
-    return { level: MAX_LEVEL, intoLevel: 0, need: 0, progress: 1 };
-  }
-  const base = LEVEL_THRESHOLDS[level - 1];
-  const next = LEVEL_THRESHOLDS[level];
-  const intoLevel = xp - base;
-  const need = next - base;
-  return { level, intoLevel, need, progress: Math.min(1, intoLevel / need) };
+/** Nível derivado das conquistas desbloqueadas (ignora a coroa `maxed`). */
+export function levelInfo(unlocked: AchievementId[]): LevelInfo {
+  const level = Math.min(MAX_LEVEL, unlocked.filter((id) => id !== 'maxed').length);
+  return { level, total: MAX_LEVEL, progress: level / MAX_LEVEL, atMax: level >= MAX_LEVEL };
 }
 
 const achievementMap = new Map<AchievementId, Achievement>(achievements.map((a) => [a.id, a]));
 
 interface GameState {
-  xp: number;
+  xp: number; // acumulador cosmético (soma de XP das conquistas / mini-game)
   unlocked: AchievementId[];
   soundEnabled: boolean;
   theme: Theme;
@@ -72,36 +60,41 @@ export const useGame = create<GameState>()(
       xp: 0,
       unlocked: [],
       soundEnabled: false,
-      theme: 'retro',
+      theme: 'dark',
       lang: 'pt',
       toasts: [],
       levelUpTo: null,
 
+      // XP virou só enfeite (número): não influencia mais o nível.
       addXp: (amount) => {
         if (amount <= 0) return;
-        const before = levelInfo(get().xp).level;
-        const nextXp = get().xp + amount;
-        const after = levelInfo(nextXp).level;
-        set({ xp: nextXp });
-        if (after > before) {
-          playSfx('levelup');
-          set({ levelUpTo: after });
-        }
+        set({ xp: get().xp + amount });
       },
 
       unlock: (id) => {
         if (get().unlocked.includes(id)) return;
         const achievement = achievementMap.get(id);
         if (!achievement) return;
+
+        const before = levelInfo(get().unlocked).level;
         set((state) => ({
           unlocked: [...state.unlocked, id],
           toasts: [...state.toasts, achievement],
+          xp: state.xp + achievement.xp,
         }));
-        playSfx('achievement');
-        get().addXp(achievement.xp);
+        const after = levelInfo(get().unlocked).level;
 
-        // Meta-conquista: alcançou o nível máximo.
-        if (id !== 'maxed' && levelInfo(get().xp).level >= MAX_LEVEL) {
+        // Cada conquista colecionável sobe um nível -> mostra o "NÍVEL UP".
+        // (first-boot acontece no carregamento, então não estoura o flash.)
+        if (after > before && id !== 'first-boot') {
+          playSfx('levelup');
+          set({ levelUpTo: after });
+        } else {
+          playSfx('achievement');
+        }
+
+        // Reuniu todas as conquistas colecionáveis -> topo -> ganha a coroa.
+        if (id !== 'maxed' && levelInfo(get().unlocked).atMax) {
           get().unlock('maxed');
         }
       },
@@ -115,7 +108,7 @@ export const useGame = create<GameState>()(
 
       setTheme: (theme) => set({ theme }),
       toggleTheme: () => {
-        set({ theme: get().theme === 'retro' ? 'cyber' : 'retro' });
+        set({ theme: get().theme === 'dark' ? 'light' : 'dark' });
         playSfx('select');
       },
 
@@ -130,6 +123,16 @@ export const useGame = create<GameState>()(
     }),
     {
       name: 'ronaldo-portfolio-save',
+      version: 2,
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as Partial<GameState> | undefined;
+        if (state && version < 1) {
+          // temas antigos (retro/cyber) -> dark
+          state.theme = state.theme === 'light' ? 'light' : 'dark';
+        }
+        // v2: nível passou a derivar das conquistas — nada a migrar (usa `unlocked`).
+        return state as GameState;
+      },
       partialize: (state) => ({
         xp: state.xp,
         unlocked: state.unlocked,
@@ -138,8 +141,11 @@ export const useGame = create<GameState>()(
         lang: state.lang,
       }),
       onRehydrateStorage: () => (state) => {
+        if (!state) return;
         // aplica o estado de som salvo no motor de áudio
-        if (state?.soundEnabled) setSoundEnabled(true);
+        if (state.soundEnabled) setSoundEnabled(true);
+        // garante um tema válido
+        if (state.theme !== 'light' && state.theme !== 'dark') state.theme = 'dark';
       },
     },
   ),

@@ -51,7 +51,15 @@ export const bugSprites: string[] = [
   '/assets/sprites/bug4.png',
 ];
 
-/** Normaliza para `undefined` quando o caminho está vazio. */
+/**
+ * Resolve um caminho de asset em `public/` respeitando a base do deploy
+ * (ex.: `/ronaldo-portfolio/` no GitHub Pages). Retorna `undefined` se vazio.
+ * Caminhos http(s) e data: passam intactos.
+ */
 export function asset(path?: string): string | undefined {
-  return path && path.trim() ? path.trim() : undefined;
+  const p = path?.trim();
+  if (!p) return undefined;
+  if (/^(https?:|data:)/.test(p)) return p;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '' em dev, '/ronaldo-portfolio' no build
+  return base + (p.startsWith('/') ? p : `/${p}`);
 }

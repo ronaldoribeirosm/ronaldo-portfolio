@@ -105,7 +105,7 @@ export default function Contact() {
   };
 
   return (
-    <Section id="contact">
+    <Section id="contact" scene="contact">
       <SectionHeading index="05" title={t(ui.contact.title)} subtitle={t(ui.contact.subtitle)} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_0.85fr]">

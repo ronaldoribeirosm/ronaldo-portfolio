@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ui } from '@/data/content';
-import { bugSprites } from '@/data/assets';
+import { bugSprites, asset } from '@/data/assets';
 import { useT } from '@/lib/i18n';
 import { useGame } from '@/store/game';
 import { playSfx } from '@/lib/sound';
@@ -50,7 +50,7 @@ export default function MiniGame({ open, onClose }: Props) {
   useEffect(() => {
     bugImgs.current = bugSprites.map((src) => {
       const img = new Image();
-      img.src = src;
+      img.src = asset(src) ?? src;
       return img;
     });
   }, []);

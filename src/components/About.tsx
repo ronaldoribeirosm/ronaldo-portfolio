@@ -15,7 +15,7 @@ export default function About() {
   ];
 
   return (
-    <Section id="about">
+    <Section id="about" scene="about">
       <SectionHeading index="01" title={t(ui.about.title)} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">

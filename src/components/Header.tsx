@@ -20,8 +20,8 @@ interface HeaderProps {
 
 export default function Header({ onSecret }: HeaderProps) {
   const { t, lang } = useT();
-  const { xp, soundEnabled, theme, toggleSound, toggleTheme, toggleLang } = useGame();
-  const lvl = levelInfo(xp);
+  const { unlocked, soundEnabled, theme, toggleSound, toggleTheme, toggleLang } = useGame();
+  const lvl = levelInfo(unlocked);
   const [active, setActive] = useState<string>('hero');
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -141,7 +141,7 @@ export default function Header({ onSecret }: HeaderProps) {
             {lang.toUpperCase()}
           </IconButton>
           <IconButton label={t(ui.themeToggle)} onClick={toggleTheme}>
-            {theme === 'retro' ? <MoonIcon /> : <BoltIcon />}
+            {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
           </IconButton>
           <IconButton
             label={soundEnabled ? t(ui.soundOn) : t(ui.soundOff)}
@@ -279,9 +279,10 @@ const MoonIcon = () => (
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
-const BoltIcon = () => (
+const SunIcon = () => (
   <svg {...iconProps} aria-hidden>
-    <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
   </svg>
 );
 const SoundOnIcon = () => (
