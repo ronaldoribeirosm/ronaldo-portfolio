@@ -221,7 +221,7 @@ export default function Contact() {
           <ContactLink
             href={profile.links.linkedin}
             label="LinkedIn"
-            value="in/ronaldo-ribeiro"
+            value="in/ronaldo-mendonca"
             external
             onGo={() => unlock('linked')}
           />

@@ -36,7 +36,7 @@ export const profile = {
   },
   links: {
     github: 'https://github.com/ronaldoribeirosm',
-    linkedin: 'https://www.linkedin.com/in/ronaldo-ribeiro-2256a43a8',
+    linkedin: 'https://www.linkedin.com/in/ronaldo-mendonca',
     email: 'ronaldoribeirosm@gmail.com',
   },
   bio: {
